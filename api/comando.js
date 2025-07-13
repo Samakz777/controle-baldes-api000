@@ -10,10 +10,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Mensagem vazia" });
   }
 
-  // Sua chave virá do ambiente seguro da Vercel
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY
   });
+
   const openai = new OpenAIApi(configuration);
 
   try {
@@ -23,8 +23,7 @@ export default async function handler(req, res) {
       messages: [
         {
           role: "system",
-          content:
-            "Você é um assistente para controle de baldes de cerveja. Sempre responda APENAS com JSON no formato: { \"acao\": \"adicionar_balde\", \"pessoa\": \"João\", \"cerveja\": \"Heineken\" }"
+          content: "Você é um assistente para controle de baldes de cerveja. Sempre responda apenas com JSON: { \\"acao\\": \\"adicionar_balde\\", \\"pessoa\\": \\"João\\", \\"cerveja\\": \\"Heineken\\" }"
         },
         { role: "user", content: mensagem }
       ]
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
     const resposta = chat.data.choices[0].message.content.trim();
     res.status(200).send(resposta);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro na OpenAI" });
+    console.error("Erro:", err.response?.data || err.message);
+    res.status(500).json({ error: "Erro ao consultar OpenAI." });
   }
 }
